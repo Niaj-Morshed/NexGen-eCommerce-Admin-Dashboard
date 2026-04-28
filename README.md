@@ -11,7 +11,7 @@ Live Demo: https://niaj-morshed.github.io/NexGen-eCommerce-Admin-Dashboard/
 
 🚀 Overview:
 -------------
-NexGen is a modern and data-driven admin dashboard designed to track sales, inventory, and 
+NexGen is a modern and data-driven admin dashboard designed to track sales, inventory, and  
 customer activity for e-commerce businesses. The project focuses on data visualization,
 which helps a business owner make informed business decisions.
 
