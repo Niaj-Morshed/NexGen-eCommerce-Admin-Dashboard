@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexGen | eCommerce Admin Dashboard</title>
+
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/9321/9321313.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Root theme variables (light & dark mode support) */
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-sidebar: #ffffff;
+            --text-main: #1e293b;
+            --accent: #6366f1;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark mode override variables */
+        [data-theme="dark"] {
+            --bg-body: #0b0f1a;
+            --bg-sidebar: #131a2a;
+            --text-main: #f8fafc;
+            --accent: #818cf8;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Reset & global font setup */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Main body styling with smooth theme transition */
+        body {
+            background: var(--bg-body);
+            color: var(--text-main);
+            transition: 0.4s;
+            min-height: 100vh;
+        }
+
+        /* Main dashboard layout container (sidebar + content) */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar navigation styling */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: 0.4s;
+            z-index: 100;
+        }
+
+        /* Logo design */
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 50px;
+            color: var(--accent);
+        }
+
+
+        /* Navigation menu list */
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+
+        /* Active & hover state for nav items */
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+
+
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            width: 100%;
+        }
+
+
+        /* Header layout */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+
+        /* Dashboard stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+
+        /* Individual stat card */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+
+
+        /* Hover effect for stat card */
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .stat-card i {
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.6;
+            font-size: 14px;
+        }
+
+
+        /* Charts container layout */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+
+        /* Chart box wrapper */
+        .chart-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 20px;
+            /* Padding ektu komano holo space baranor jonno */
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            height: 420px;
+            /* Height ektu barano holo */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+
+        /* Chart canvas responsive control */
+        .chart-box canvas {
+            flex-grow: 1;
+            /* Chart-ke box-er baki jayga nite bolbe */
+            max-height: calc(100% - 40px) !important;
+            /* Heading-er jonno jayga rekhe baki tuku nibe */
+            width: 100% !important;
+        }
+
+        /* Settings section-er jonno height auto thakbe jate button na kate */
+        #settings .chart-box {
+            height: auto !important;
+            min-height: 420px;
+            padding-bottom: 30px;
+        }
+
+        /* Section switching animation */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+
+        /* Active section display */
+        .content-section.active {
+            display: block;
+        }
+
+        /* Fade animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- RESPONSIVE FIXES Phone/ Tablet (THE MAGIC PART) --- */
+        /* Tablet responsive fix */
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile responsive layout */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+                height: auto;
+                overflow-x: hidden;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px 20px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+            }
+
+            .logo {
+                margin-bottom: 15px;
+                text-align: center;
+                font-size: 20px;
+            }
+
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                /* Mobile-e menu scroll hobe */
+                padding-bottom: 5px;
+                gap: 8px;
+                justify-content: flex-start;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-menu::-webkit-scrollbar {
+                display: none;
+                /* Scrollbar hide korbe */
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+                padding: 8px 15px;
+                white-space: nowrap;
+                /* Text break hobe na */
+                font-size: 13px;
+                gap: 8px;
+            }
+
+            .main-content {
+                padding: 20px;
+                height: auto;
+            }
+
+            header {
+                margin-bottom: 25px;
+                text-align: left;
+            }
+
+            header h2 {
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                /* Single column stats */
+                gap: 15px;
+            }
+
+            .chart-box {
+                padding: 20px;
+                min-height: 300px;
+            }
+        }
+
+        /* Small Phone Fix */
+        @media (max-width: 480px) {
+            #auth-box {
+                padding: 25px !important;
+            }
+
+            .stat-card h3 {
+                font-size: 22px;
+            }
+        }
+
+
+        /* Table row hover effect */
+        table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+
+    <!----- Signin Signup Controls --->
+    <div id="auth-overlay" class="fixed" style="position: fixed; inset: 0; z-index: 9999; background: var(--bg-body); display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--bg-sidebar); border: 1px solid var(--border); padding: 40px; border-radius: 25px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+
+            <div style="background: var(--accent); color: white; padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 14px; line-height: 1.5; text-align: center; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);">
+                <strong style="font-size: 16px;">NexGen eCommerce Admin Dashboard</strong><br>
+                Please log in to explore live analytics, customer database management, and premium dark/light UI features.
+            </div>
+
+            <div id="auth-box">
+                <h2 id="auth-title" style="font-size: 28px; font-weight: 800; margin-bottom: 10px; color: var(--accent);">Login</h2>
+                <p id="auth-subtitle" style="margin-bottom: 30px; opacity: 0.6; font-size: 14px;">Welcome back to NexGen AI.</p>
+
+                <form id="auth-form" style="display: flex; flex-direction: column; gap: 15px;">
+                    <input type="email" id="auth-email" placeholder="Email Address" value="admin@nexgen.com" required style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main); font-size: 16px; outline: none;">
+
+                    <input type="password" id="auth-password" placeholder="Password" value="123456" required style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main); font-size: 16px; outline: none;">
+
+                    <button type="submit" id="auth-btn" style="background: var(--accent); color: white; padding: 15px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s;">Login to Dashboard</button>
+                </form>
+
+                <p style="margin-top: 25px; text-align: center; font-size: 14px; opacity: 0.8;">
+                    <span id="toggle-text">Demo Access: admin@nexgen.com | 123456</span>
+                    <a href="#" id="toggle-auth" style="color: var(--accent); font-weight: 700; text-decoration: none; margin-left: 5px;">Sign Up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <div class="dashboard-container" id="main-dashboard" style="display: none;">
+        <aside class="sidebar">
+            <div class="logo">NEXGEN <span style="font-size: 12px; opacity: 0.7;">eCom</span></div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="showSection('overview', this)"><i class="fas fa-th-large"></i> <span>Overview</span></li>
+                <li class="nav-item" onclick="showSection('analytics', this)"><i class="fas fa-chart-line"></i> <span>Analytics</span></li>
+                <li class="nav-item" onclick="showSection('customers', this)"><i class="fas fa-users"></i> <span>Customers</span></li>
+
+                <li class="nav-item" onclick="showSection('settings', this)">
+                    <i class="fas fa-cog"></i> <span>Settings</span>
+                </li>
+
+                <li class="nav-item" style="margin-top: auto; color: #ef4444;" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </li>
+
+
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h2 id="section-title">Overview Dashboard</h2>
+
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="text-align: right; display: none;" id="user-info-text">
+                        <h4 id="user-display-name" style="font-size: 14px; margin: 0;">User Name</h4>
+                        <p id="user-display-email" style="font-size: 12px; opacity: 0.6; margin: 0;">user@email.com</p>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent); cursor: pointer;" onclick="showSection('settings', document.querySelector('.nav-menu li:last-child'))">
+                </div>
+
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <i id="theme-icon" class="fas fa-moon"></i>
+                </div>
+            </header>
+
+            <div id="overview" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <i class="fas fa-wallet"></i>
+                            <span style="color: #22c55e; font-size: 12px; font-weight: 700;"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                        </div>
+                        <h3>$54,230.80</h3>
+                        <p>Total Revenue (MTD)</p>
+                    </div>
+                    <div class="stat-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span style="color: #ef4444; font-size: 12px; font-weight: 700;"><i class="fas fa-arrow-down"></i> 3.2%</span>
+                        </div>
+                        <h3>1,420</h3>
+                        <p>Monthly Transactions</p>
+                    </div>
+                    <div class="stat-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <i class="fas fa-user-plus"></i>
+                            <span style="color: #22c55e; font-size: 12px; font-weight: 700;"><i class="fas fa-arrow-up"></i> 18%</span>
+                        </div>
+                        <h3>850</h3>
+                        <p>Active Subscribers</p>
+                    </div>
+                    <div class="stat-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <i class="fas fa-clock"></i>
+                            <span style="color: #22c55e; font-size: 12px; font-weight: 700;">Stable</span>
+                        </div>
+                        <h3>99.98%</h3>
+                        <p>System Health (Uptime)</p>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-box">
+                        <h4 style="margin-bottom: 20px;">Revenue Growth</h4>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h4 style="margin-bottom: 20px;">User Distribution</h4>
+                        <canvas id="userChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="analytics" class="content-section">
+                <div class="chart-box">
+                    <h2>Advanced Market Analytics</h2>
+                    <p style="margin-bottom: 30px; opacity: 0.6;">Real-time data visualization of global market trends.</p>
+                    <canvas id="analyticsChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <div id="customers" class="content-section">
+                <div class="chart-box" style="height: auto; min-height: 500px;">
+
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2>Customer Database</h2>
+                            <p style="opacity: 0.6; font-size: 14px;">Manage and track your global buyers</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="text" id="customerSearch" onkeyup="filterCustomers()" placeholder="Search by name..." style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+
+                            <select id="statusFilter" onchange="filterCustomers()" style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                            </select>
+
+                            <button onclick="openCustomerModal()" style="background: var(--accent); color: white; padding: 10px 20px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer;">
+                                <i class="fas fa-plus"></i> Add Customer
+                            </button>
+                        </div>
+                    </div>
+
+
+
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border); opacity: 0.7;">
+                                    <th style="padding: 15px;">Customer</th>
+                                    <th style="padding: 15px;">Status</th>
+                                    <th style="padding: 15px;">Email</th>
+                                    <th style="padding: 15px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customer-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings" class="content-section">
+                <div class="chart-box" style="max-width: 500px;">
+                    <h2>Edit Profile</h2>
+                    <p style="margin-bottom: 20px; opacity: 0.6;">Update your account information</p>
+
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="text-align: center; margin-bottom: 10px;">
+                            <img id="settings-avatar" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent);">
+                            <p style="font-size: 12px; margin-top: 5px; color: var(--accent);">Avatar updates automatically with name</p>
+                        </div>
+
+                        <div class="input-group">
+                            <label style="display: block; margin-bottom: 5px; font-size: 14px;">User Name</label>
+                            <input type="text" id="update-name" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main);">
+                        </div>
+
+                        <div class="input-group">
+                            <label style="display: block; margin-bottom: 5px; font-size: 14px;">New Password</label>
+                            <input type="password" id="update-pass" placeholder="Leave blank to keep old one" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main);">
+                        </div>
+
+                        <button onclick="updateProfile()" style="background: var(--accent); color: white; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; margin-top: 10px;">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+
+
+
+
+
+
+
+    <div id="customer-modal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--bg-sidebar); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px;">
+            <h3 id="modal-title" style="margin-bottom: 20px;">Add New Customer</h3>
+            <input type="hidden" id="edit-id">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="cust-name" placeholder="Full Name" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main);">
+                <input type="email" id="cust-email" placeholder="Email Address" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main);">
+                <select id="cust-status" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main);">
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                </select>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="saveCustomer()" style="flex: 1; background: var(--accent); color: white; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700;">Save</button>
+                    <button onclick="closeCustomerModal()" style="flex: 1; background: #ccc; color: #333; padding: 12px; border-radius: 10px; border: none; cursor: pointer;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+        // Theme toggle function (light <-> dark)
+       function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('theme-icon');
+
+    if (body.getAttribute('data-theme') === 'light') {
+        body.setAttribute('data-theme', 'dark');
+        icon.className = 'fas fa-sun';
+
+        // SAVE THEME
+        localStorage.setItem('theme', 'dark');
+
+    } else {
+        body.setAttribute('data-theme', 'light');
+        icon.className = 'fas fa-moon';
+
+        // SAVE THEME
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+
+
+        // SPA navigation system (section switcher)
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (element) element.classList.add('active');
+
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.getElementById('section-title').innerText = sectionId.charAt(0).toUpperCase() + sectionId.slice(1) + " Dashboard";
+
+            // Active section-ti save kore rakha holo
+            localStorage.setItem('lastSection', sectionId);
+        }
+
+
+
+
+
+        // Update UI stats + sync with localStorage + update chart
+        function updateDashboardUI() {
+            // UI Stats update kora
+            const revElement = document.querySelector('.stat-card:nth-child(1) h3');
+            const transElement = document.querySelector('.stat-card:nth-child(2) h3');
+            const subElement = document.querySelector('.stat-card:nth-child(3) h3');
+
+            if (revElement) revElement.innerText = statsData.totalRevenue;
+            if (transElement) transElement.innerText = statsData.transactions;
+            if (subElement) subElement.innerText = statsData.subscribers;
+
+            // LocalStorage-e data save kora
+            localStorage.setItem('nexgen_stats', JSON.stringify(statsData));
+            localStorage.setItem('nexgen_customers', JSON.stringify(customers));
+
+            // Chart live update kora
+            if (myRevenueChart) {
+                myRevenueChart.data.datasets[0].data = statsData.revenue;
+                myRevenueChart.update();
+            }
+        }
+
+
+
+
+
+
+
+
+        // Initialize all charts (Revenue, Users, Analytics)
+        function initCharts() {
+            const ctx1 = document.getElementById('revenueChart').getContext('2d');
+            const gradient = ctx1.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            // Instance-ke global variable 'myRevenueChart' e save kora holo
+            myRevenueChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Net Revenue',
+                        data: statsData.revenue,
+                        borderColor: '#6366f1',
+                        borderWidth: 3,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // User Distribution Chart
+            const ctx2 = document.getElementById('userChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Enterprise', 'Personal', 'Referral', 'Organic'],
+                    datasets: [{
+                        data: statsData.users,
+                        backgroundColor: ['#6366f1', '#a855f7', '#f43f5e', '#fbbf24']
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Market Share Chart
+            const ctx3 = document.getElementById('analyticsChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['US', 'Germany', 'UK', 'Canada', 'Japan', 'BD', 'France'],
+                    datasets: [{
+                        label: 'Market Share (%)',
+                        data: [85, 72, 68, 55, 48, 92, 40],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            updateDashboardUI();
+        }
+
+
+
+
+
+
+
+
+        //Auth Logic
+        const authOverlay = document.getElementById('auth-overlay');
+        const mainDashboard = document.getElementById('main-dashboard');
+        const authForm = document.getElementById('auth-form');
+        const toggleAuth = document.getElementById('toggle-auth');
+        let isLogin = true;
+
+
+
+
+        // Auth system (login/signup toggle)
+        toggleAuth.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            document.getElementById('auth-title').innerText = isLogin ? "Login" : "Sign Up";
+            document.getElementById('auth-btn').innerText = isLogin ? "Login" : "Create Account";
+            toggleAuth.innerText = isLogin ? "Sign Up" : "Login";
+        });
+
+
+
+
+        // Login / Signup handler
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            // Guest Login Logic for Portfolio
+            if (isLogin) {
+                const savedUser = JSON.parse(localStorage.getItem('nexgen_user'));
+
+                // JODI CLIENT DEFAULT EMAIL DIYE LOGIN KORE (Admin Login)
+                if (email === "admin@nexgen.com") {
+                    if (!savedUser) {
+                        localStorage.setItem('nexgen_user', JSON.stringify({
+                            email: "admin@nexgen.com",
+                            password: "123456",
+                            name: "Admin"
+                        }));
+                    }
+                    loginSuccess();
+                }
+                // JODI AGER THEKE REGISTERED KONO USER HOY
+                else if (savedUser && savedUser.email === email && savedUser.password === password) {
+                    loginSuccess();
+                } else {
+                    alert("Invalid credentials! Try using admin@nexgen.com");
+                }
+            } else {
+                // Sign Up Logic (Ager motoi thakbe)
+                localStorage.setItem('nexgen_user', JSON.stringify({
+                    email,
+                    password,
+                    name: email.split('@')[0]
+                }));
+                alert("Account Created! Please login.");
+                isLogin = true;
+                toggleAuth.click();
+            }
+        });
+
+
+
+
+
+
+
+
+        // Successful login handler (UI + avatar + charts init)
+        function loginSuccess() {
+            authOverlay.style.display = 'none';
+            mainDashboard.style.display = 'flex';
+
+            localStorage.setItem('isLoggedIn', 'true');
+
+            const savedUser = JSON.parse(localStorage.getItem('nexgen_user'));
+            if (savedUser) {
+                const userName = savedUser.name || savedUser.email.split('@')[0];
+
+                // UI Update
+                document.getElementById('user-display-name').innerText = userName.toUpperCase();
+                document.getElementById('user-display-email').innerText = savedUser.email;
+                document.getElementById('update-name').value = userName;
+
+                const avatarUrl = `https://ui-avatars.com/api/?name=${userName}&background=6366f1&color=fff`;
+                document.getElementById('user-avatar').src = avatarUrl;
+                document.getElementById('settings-avatar').src = avatarUrl;
+
+                if (window.innerWidth > 768) {
+                    document.getElementById('user-info-text').style.display = 'block';
+                }
+            }
+            initCharts(); // Login holei chart load hobe
+        }
+
+
+
+
+
+
+
+
+
+        // Update profile (name/password/avatar)
+        function updateProfile() {
+            const newName = document.getElementById('update-name').value;
+            const newPass = document.getElementById('update-pass').value;
+            const savedUser = JSON.parse(localStorage.getItem('nexgen_user'));
+
+            if (savedUser) {
+                savedUser.name = newName;
+                if (newPass.trim() !== "") {
+                    savedUser.password = newPass;
+                }
+
+                localStorage.setItem('nexgen_user', JSON.stringify(savedUser));
+
+                // UI Update
+                document.getElementById('user-display-name').innerText = newName.toUpperCase();
+                const newAvatar = `https://ui-avatars.com/api/?name=${newName}&background=6366f1&color=fff`;
+                document.getElementById('user-avatar').src = newAvatar;
+                document.getElementById('settings-avatar').src = newAvatar;
+
+                alert("Profile Updated Successfully!");
+
+                // --- EI LINE TA ADD KORA HOYECHE ---
+                // Save korar por auto Overview dashboard-e niye jabe
+                showSection('overview', document.querySelector('.nav-menu li:first-child'));
+            }
+        }
+
+
+
+
+
+
+
+
+        let myRevenueChart;
+
+        // Default stats data (fallback যদি localStorage empty থাকে)
+        let statsData = JSON.parse(localStorage.getItem('nexgen_stats')) || {
+            revenue: [31000, 38000, 35000, 42000, 41000, 48000, 52000, 49000, 58000, 62000, 68000, 75000],
+            users: [40, 25, 20, 15],
+            totalRevenue: "$54,230.80",
+            transactions: "1,420",
+            subscribers: "850"
+        };
+
+
+
+
+
+
+        // Customer database (localStorage based)
+        let customers = JSON.parse(localStorage.getItem('nexgen_customers')) || [{
+                id: 1,
+                name: "Arif Ahmed",
+                email: "arif@example.com",
+                status: "active"
+            },
+            {
+                id: 2,
+                name: "Sarah Khan",
+                email: "sarah@web.com",
+                status: "pending"
+            },
+            {
+                id: 3,
+                name: "John Doe",
+                email: "john@nexgen.ai",
+                status: "active"
+            }
+        ];
+
+
+
+
+
+
+        // Render customers into table
+        function renderCustomers(data = customers) {
+            const tableBody = document.getElementById('customer-table-body');
+            tableBody.innerHTML = "";
+
+            data.forEach(customer => {
+                tableBody.innerHTML += `
+            <tr>
+                <td style="padding: 15px; font-weight: 600;">${customer.name}</td>
+                <td style="padding: 15px;"><span class="status-badge status-${customer.status}">${customer.status.toUpperCase()}</span></td>
+                <td style="padding: 15px; opacity: 0.7;">${customer.email}</td>
+                <td style="padding: 15px; display: flex; gap: 15px;">
+                    <button onclick="editCustomer(${customer.id})" style="background: none; border: none; color: var(--accent); cursor: pointer;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteCustomer(${customer.id})" style="background: none; border: none; color: #ef4444; cursor: pointer;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+            });
+        }
+
+
+
+
+
+        // Open customer modal (add mode)
+        function openCustomerModal() {
+            document.getElementById('modal-title').innerText = "Add New Customer";
+            document.getElementById('edit-id').value = "";
+            document.getElementById('cust-name').value = "";
+            document.getElementById('cust-email').value = "";
+            document.getElementById('customer-modal').style.display = 'flex';
+        }
+
+
+
+
+
+        // Close modal
+        function closeCustomerModal() {
+            document.getElementById('customer-modal').style.display = 'none';
+        }
+
+
+
+
+
+        // Add / Update customer
+        function saveCustomer() {
+            const id = document.getElementById('edit-id').value;
+            const name = document.getElementById('cust-name').value;
+            const email = document.getElementById('cust-email').value;
+            const status = document.getElementById('cust-status').value;
+
+            if (!name || !email) return alert("Please fill all fields");
+
+            if (id) {
+                // Update existing
+                const index = customers.findIndex(c => c.id == id);
+                customers[index] = {
+                    ...customers[index],
+                    name,
+                    email,
+                    status
+                };
+            } else {
+                // Add new
+                customers.unshift({
+                    id: Date.now(),
+                    name,
+                    email,
+                    status
+                });
+            }
+
+            renderCustomers();
+
+            // Notun customer add hole logic-ali stats ektu bariye deya
+            if (!id) {
+                let currentRev = parseFloat(statsData.totalRevenue.replace('$', '').replace(',', ''));
+                statsData.totalRevenue = "$" + (currentRev + 500).toLocaleString(); // Revenue $500 barlo
+                statsData.transactions = (parseInt(statsData.transactions.replace(',', '')) + 1).toLocaleString();
+                statsData.subscribers = (parseInt(statsData.subscribers) + 1).toString();
+
+                // Chart-er shesh month-er data ektu bariye deya
+                statsData.revenue[statsData.revenue.length - 1] += 500;
+            }
+            updateDashboardUI();
+            // location.reload(); // Chart instant update dekhte reload dite paro ba initCharts() abar call korte paro
+
+            closeCustomerModal();
+        }
+
+
+
+
+
+
+
+
+
+        // Load data into modal for editing
+        function editCustomer(id) {
+            const customer = customers.find(c => c.id == id);
+            document.getElementById('modal-title').innerText = "Edit Customer";
+            document.getElementById('edit-id').value = customer.id;
+            document.getElementById('cust-name').value = customer.name;
+            document.getElementById('cust-email').value = customer.email;
+            document.getElementById('cust-status').value = customer.status;
+            document.getElementById('customer-modal').style.display = 'flex';
+        }
+
+
+
+
+
+
+        // Search + filter customers
+        function filterCustomers() {
+            const searchTerm = document.getElementById('customerSearch').value.toLowerCase();
+            const statusValue = document.getElementById('statusFilter').value;
+
+            const filtered = customers.filter(c => {
+                const matchesSearch = c.name.toLowerCase().includes(searchTerm);
+                const matchesStatus = (statusValue === "all" || c.status === statusValue);
+                return matchesSearch && matchesStatus;
+            });
+            renderCustomers(filtered);
+        }
+
+
+
+
+
+
+
+
+
+        // Delete customer + update stats
+        function deleteCustomer(id) {
+            if (confirm("Are you sure you want to delete this customer?")) {
+                customers = customers.filter(c => c.id !== id);
+                renderCustomers();
+
+                statsData.subscribers = (parseInt(statsData.subscribers) - 1).toString();
+                updateDashboardUI();
+
+            }
+        }
+
+
+
+
+
+
+
+        // Logout system (clear storage + reload)
+        function handleLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('lastSection');
+            location.reload(); // Ekhon reload dile login page-e jabe
+        }
+
+
+
+
+
+
+        // Initial customer render
+        renderCustomers();
+
+
+
+
+
+
+        // Auto login + last section restore on reload
+        window.onload = function() {
+            
+            
+            // Load saved theme on page load
+const savedTheme = localStorage.getItem('theme');
+
+if (savedTheme) {
+    document.body.setAttribute('data-theme', savedTheme);
+
+    const icon = document.getElementById('theme-icon');
+    if (savedTheme === 'dark') {
+        icon.className = 'fas fa-sun';
+    } else {
+        icon.className = 'fas fa-moon';
+    }
+}
+            
+            
+            
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                loginSuccess();
+
+                const lastSection = localStorage.getItem('lastSection') || 'overview';
+                const navItem = Array.from(document.querySelectorAll('.nav-item')).find(item =>
+                    item.getAttribute('onclick').includes(lastSection)
+                );
+                showSection(lastSection, navItem);
+            }
+        };
+    </script>
+</body>
+
+</html>
